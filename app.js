@@ -72,6 +72,7 @@ app.post('/generate', function (req, res) {
           res.send(err);
       }
   }
+  fs.unlinkSync(randFileName);
   res.send("success");
     });
   }, 2000);
