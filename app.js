@@ -6,15 +6,9 @@ var logger = require('morgan');
 var pdfFillForm = require('pdf-fill-form');
 var fs = require('fs');
 const bodyParser = require('body-parser');
-const aws = require('aws-sdk');
+var mailer = require('nodemailer');
 
 var app = express();
-
-aws.config.update({
-  region: 'us-east-2' // region of your bucket
-});
-
-const s3 = new aws.S3();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,6 +27,16 @@ console.log(pdfFields);
 
 */
 
+let transporter = mailer.createTransport({
+  host: 'smtp.gmail.com', 
+  port:465,
+  secure: true, 
+  auth:{
+    user: 'ruvotingwizard@gmail.com', 
+    pass: '#BOSH7rutgers'
+  }
+});
+
 app.post('/generate', function (req, res) {
   let randFileName = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5) + ".pdf";
   pdfFillForm.writeAsync('voterFormMiddlesex.pdf', req.body, { "save": "pdf" }, 
@@ -41,27 +45,34 @@ app.post('/generate', function (req, res) {
     }
   );
   setTimeout(function() {
-    location = "https://s3.amazonaws.com/generated-forms0598/" + randFileName;
     fs.readFile(randFileName, (err, data) => {
       if (err) throw err;
       var base64data = new Buffer(data, 'binary');
-      var params = {
-        Key : randFileName,
-        Body : base64data,
-        Bucket : 'generated-forms0598',
-        ContentType : 'application/pdf',
-        ContentDisposition: 'inline',
-        ACL: 'public-read'
+      transporter.sendMail({       
+        sender: 'ruvotingwizard@gmail.com',
+        to: 'avinabraham17@gmail.com',
+        subject: 'Your Filled-In Voting Form',
+        text: 'The filled-out voter registration form is attached for your records! Thank you for using RU Voting Wizard!',
+        attachments: [{'filename': randFileName, 'content': base64data}]
+    }), function(err, success) {
+        if (err) {
+            // Handle error
+            res.send(err);
+        }
+    }
+    transporter.sendMail({       
+      sender: 'ruvotingwizard@gmail.com',
+      to: 'avinabraham17@gmail.com',
+      subject: 'New Filled-In Voter Registration Form',
+      text: 'Attached for printing.',
+      attachments: [{'filename': randFileName, 'content': base64data}]
+  }), function(err, success) {
+      if (err) {
+          // Handle error
+          res.send(err);
       }
-      s3UploadPromise = new Promise(function(resolve, reject) {
-        console.log("here");
-        s3.putObject(params, function(s3Err, response) {
-          if (s3Err) throw s3Err;
-          console.log(response);
-          resolve();
-        });
-      });
-      s3UploadPromise.then(function(){fs.unlinkSync(randFileName);res.send(location);});
+  }
+  res.send("success");
     });
   }, 2000);
 });

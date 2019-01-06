@@ -15,7 +15,7 @@
     "morgan": "~1.9.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.384.0",
+    "nodemailer": "^5.0.0",
     "pdf-fill-form": "^4.1.0"
   }
 }
