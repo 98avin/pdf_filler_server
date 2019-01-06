@@ -41,18 +41,23 @@ app.post('/generate', function (req, res) {
     }
   );
   setTimeout(function() {
-    location = "weird";
+    location = "https://s3.amazonaws.com/generated-forms0598/" + randFileName;
     fs.readFile(randFileName, (err, data) => {
       if (err) throw err;
-      const params = {
-          Bucket: 'generated-forms0598', // pass your bucket name
-          Key: randFileName, 
-          Body: JSON.stringify(data, null, 2)
-      };
+      var base64data = new Buffer(data, 'binary');
+      var params = {
+        Key : randFileName,
+        Body : base64data,
+        Bucket : 'generated-forms0598',
+        ContentType : 'application/pdf',
+        ContentDisposition: 'inline',
+        ACL: 'public-read'
+      }
       s3UploadPromise = new Promise(function(resolve, reject) {
-        s3.upload(params, function(s3Err, data) {
+        console.log("here");
+        s3.putObject(params, function(s3Err, response) {
           if (s3Err) throw s3Err;
-          location = data.Location;
+          console.log(response);
           resolve();
         });
       });
