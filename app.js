@@ -41,12 +41,15 @@ app.post('/generate', function (req, res) {
   let randFileName = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5) + ".pdf";
   pdfFillForm.writeAsync('voterFormMiddlesex.pdf', req.body, { "save": "pdf" }, 
     function(err, pdf) {
-        fs.writeFile(randFileName, pdf, function(err){});
+        if (err) res.status(500).send({ error: err });
+        fs.writeFile(randFileName, pdf, function(err){
+          if (err) res.status(500).send({ error: err });
+        });
     }
   );
   setTimeout(function() {
     fs.readFile(randFileName, (err, data) => {
-      if (err) throw err;
+      if (err) res.status(500).send({ error: err });
       var base64data = new Buffer(data, 'binary');
       transporter.sendMail({       
         sender: 'ruvotingwizard@gmail.com',
@@ -57,7 +60,7 @@ app.post('/generate', function (req, res) {
     }), function(err, success) {
         if (err) {
             // Handle error
-            res.send(err);
+            res.status(500).send({ error: err });
         }
     }
     transporter.sendMail({       
@@ -69,11 +72,11 @@ app.post('/generate', function (req, res) {
   }), function(err, success) {
       if (err) {
           // Handle error
-          res.send(err);
+          res.status(500).send({ error: err });
       }
   }
   fs.unlinkSync(randFileName);
-  res.send("success");
+  res.status(200);
     });
   }, 2000);
 });
