@@ -41,15 +41,15 @@ app.post('/generate', function (req, res) {
   let randFileName = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5) + ".pdf";
   pdfFillForm.writeAsync('voterFormMiddlesex.pdf', req.body, { "save": "pdf" }, 
     function(err, pdf) {
-        if (err) res.status(500).send({ error: err });
+        if (err) res.status(500).send(err);
         fs.writeFile(randFileName, pdf, function(err){
-          if (err) res.status(500).send({ error: err });
+          if (err) res.status(500).send(err);
         });
     }
   );
   setTimeout(function() {
     fs.readFile(randFileName, (err, data) => {
-      if (err) res.status(500).send({ error: err });
+      if (err) res.status(500).send(err);
       var base64data = new Buffer(data, 'binary');
       transporter.sendMail({       
         sender: 'ruvotingwizard@gmail.com',
@@ -60,7 +60,7 @@ app.post('/generate', function (req, res) {
     }), function(err, success) {
         if (err) {
             // Handle error
-            res.status(500).send({ error: err });
+            res.status(500).send(err);
         }
     }
     transporter.sendMail({       
@@ -72,11 +72,11 @@ app.post('/generate', function (req, res) {
   }), function(err, success) {
       if (err) {
           // Handle error
-          res.status(500).send({ error: err });
+          res.status(500).send(err);
       }
   }
   fs.unlinkSync(randFileName);
-  res.status(200);
+  res.status(200).send('success');
     });
   }, 2000);
 });
