@@ -21,11 +21,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-/*
-var pdfFields = pdfFillForm.readSync('test.pdf');
+
+var pdfFields = pdfFillForm.readSync('voterFormMiddlesex.pdf');
 console.log(pdfFields);
 
-*/
+
 
 let transporter = mailer.createTransport({
   host: 'smtp.gmail.com', 
@@ -55,7 +55,7 @@ app.post('/generate', function (req, res) {
         sender: 'ruvotingwizard@gmail.com',
         to: 'avinabraham17@gmail.com',
         subject: 'Your Filled-In Voting Form',
-        text: 'The filled-out voter registration form is attached for your records! Thank you for using RU Voting Wizard!',
+        text: 'The filled-out voter registration form is attached for your records. Thank you for using RU Voting Wizard!',
         attachments: [{'filename': randFileName, 'content': base64data}]
     }), function(err, success) {
         if (err) {
