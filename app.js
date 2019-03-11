@@ -34,19 +34,18 @@ app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
   // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, Accept, X-Custom-Header');
 
   // Set to true if you need the website to include cookies in the requests sent
   // to the API (e.g. in case you use sessions)
   res.setHeader('Access-Control-Allow-Credentials', true);
 
   if (req.method == "OPTIONS") {
-    res.setStatus(200);
-    return
-}
+    return res.setStatus(200).end();
+  }
 
   // Pass to next layer of middleware
-  next();
+  return next();
 });
 
 let transporter = mailer.createTransport({
